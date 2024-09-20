@@ -8,8 +8,9 @@ module CharDetNg
     BUFFER_SIZE = 1024 * 1024
 
     def self.guess_and_assess_file(path, allow_utf8: true)
-      f = File.open(path, mode: "rb")
-      guess_and_assess_io(f, allow_utf8:)
+      File.open(path, mode: "rb") do |f|
+        guess_and_assess_io(f, allow_utf8:)
+      end
     end
 
     def self.guess_and_assess_io(io, allow_utf8: true)
@@ -44,7 +45,7 @@ module CharDetNg
     end
 
     def guess(tld: nil, allow_utf8: true)
-      enc, _reliable = guess_and_assess(tld, allow_utf8)
+      enc, _reliable = guess_and_assess(tld:, allow_utf8:)
       enc
     end
   end

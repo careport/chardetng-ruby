@@ -1,35 +1,58 @@
 # CharDetNg
 
-TODO: Delete this and the text below, and describe your gem
-
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/char_det_ng`. To experiment with that code, run `bin/console` for an interactive prompt.
+Character encoding detection using [chardetng](https://github.com/hsivonen/chardetng).
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
-
-Install the gem and add to the application's Gemfile by executing:
-
-```bash
-bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+Add to your application's Gemfile:
+```ruby
+gem "char_det_ng", git: "https://github.com/careport/chardetng-ruby"
 ```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
-
+And install with:
 ```bash
-gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+bundle install
 ```
 
 ## Usage
 
-TODO: Write usage instructions here
+Create a detector, feed it data, and guess at the encoding:
+```ruby
+require "char_det_ng"
 
-## Development
+# Instantiate an EncodingDetector
+detector = CharDetNg::EncodingDetector.new
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+# Feed it data
+detector << File.read("/path/to/some/text/file")
+# => true
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+# Guess the encoding, along with a boolean indicating
+# whether the result is more likely than other encodings
+detector.guess_and_assess
+# => ["UTF-8", true]
 
-## Contributing
+# Or, if you just want the encoding:
+detector.guess
+# => "UTF-8"
+```
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/char_det_ng.
+There are also simple APIs for dealing with entire files:
+```ruby
+require "char_det_ng"
+
+CharDetNg::EncodingDetector.guess_and_assess_file("/path/to/file")
+# => ["WINDOWS-1252", true]
+```
+
+and IO objects:
+```ruby
+File.open("/path/to/file", mode: "rb") do |f|
+  CharDetNg::EncodingDetector.guess_and_assess_io(f)
+end
+# => ["WINDOWS-1252", true]
+```
+
+The simple APIs read until EOF. If you want to guess without reading the
+whole thing, you should instantiate a detector object and feed it data,
+as in the first example.
